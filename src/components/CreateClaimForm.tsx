@@ -33,6 +33,7 @@ function sources(value: string) {
 
 export function CreateClaimForm() {
   const [protocol, setProtocol] = useState<ProtocolReadState | null>(null);
+  const [preview, setPreview] = useState({ statement: "", criteria: "", bond: "", sourceCount: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [txState, setTxState] = useState<TransactionState>("idle");
@@ -77,6 +78,12 @@ export function CreateClaimForm() {
 
   useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
 
+  function updatePreview(event: FormEvent<HTMLFormElement>) {
+    const values = new FormData(event.currentTarget);
+    const issuerSources = String(values.get("issuerSources") ?? "").split("\n").map((item) => item.trim()).filter(Boolean);
+    setPreview({ statement: String(values.get("statement") ?? ""), criteria: String(values.get("criteria") ?? ""), bond: String(values.get("bond") ?? ""), sourceCount: issuerSources.length });
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -117,11 +124,11 @@ export function CreateClaimForm() {
   return (
     <div className="form-layout">
       <div className="form-card">
-        <div className="form-intro"><p className="eyebrow">01 / Your commitment</p><h2>Define the warranty</h2><p>Be precise. These details become part of the permanent claim.</p></div>
+        <div className="form-intro"><div className="form-intro-top"><p className="eyebrow">01 / Your commitment</p><span className="form-code">ISSUE / 01</span></div><h2>Define the warranty</h2><p>Be precise. These details become part of the permanent claim.</p><div className="form-steps" aria-label="Warranty issue steps"><span className="active"><i>01</i> Define</span><span><i>02</i> Bond</span><span><i>03</i> Finalize</span></div></div>
         {loading ? <div className="loading-bar" aria-label="Loading protocol configuration" /> : null}
         {error ? <div ref={errorRef} className="error-summary" tabIndex={-1} role="alert"><strong>Action needs attention</strong>{error}</div> : null}
         <TransactionStatus state={txState} message={txMessage} hash={txHash} />
-        <form className="form-stack mt-24" onSubmit={submit}>
+        <form className="form-stack mt-24" onSubmit={submit} onInput={updatePreview}>
           <div className="field">
             <label htmlFor="statement">Specific claim</label>
             <textarea id="statement" name="statement" required maxLength={1200} placeholder="Example: This report uses only primary sources for its factual claims." />
@@ -156,12 +163,30 @@ export function CreateClaimForm() {
       </div>
       <aside className="form-aside">
         <div className="aside-card">
-          <h2>Before you sign</h2>
+          <p className="eyebrow">Preflight / 01</p><h2>Before you sign</h2>
+          <p className="aside-lead">Your warranty becomes a permanent protocol record with real value at stake.</p>
           <dl>
-            <div><dt>Lock</dt><dd>{protocol?.config ? `${formatGen(protocol.config.minClaimBond)} GEN minimum` : "Live contract required"}</dd></div>
+            <div><dt>Claim bond</dt><dd>{protocol?.config ? `${formatGen(protocol.config.minClaimBond)} GEN minimum` : "Live contract required"}</dd></div>
             <div><dt>Challenge window</dt><dd>{protocol?.config ? `${Number(protocol.config.challengeWindowSeconds) / 3600} hours` : "—"}</dd></div>
+            <div><dt>Network</dt><dd>{protocol?.network ? `${protocol.network} · ${protocol.chainId ?? "—"}` : "Live contract required"}</dd></div>
             <div><dt>Final decision</dt><dd>Consensus, not submission, settles the warranty.</dd></div>
           </dl>
+          <div className="aside-signature"><span>Commitment</span><strong>Evidence → consensus → finality</strong></div>
+        </div>
+        <div className="warranty-preview" aria-live="polite">
+          <div className="preview-topline"><span>Draft instrument</span><span>Warranty / pending</span></div>
+          <div className="preview-id"><span>Warranty ID</span><strong>Pending</strong></div>
+          <p className="preview-label">Claim</p>
+          <p className="preview-statement">{preview.statement.trim() || "Your precise promise will appear here."}</p>
+          <div className="preview-criteria"><span>Criteria</span><p>{preview.criteria.trim() || "A bounded evidence standard will appear here."}</p></div>
+          <dl className="preview-facts">
+            <div><dt>Bond</dt><dd>{preview.bond.trim() || (protocol?.config ? formatGen(protocol.config.minClaimBond) : "—")} GEN</dd></div>
+            <div><dt>Challenge bond</dt><dd>{protocol?.config ? `${formatGen(protocol.config.challengeBond)} GEN` : "—"}</dd></div>
+            <div><dt>Evidence</dt><dd>{preview.sourceCount} source{preview.sourceCount === 1 ? "" : "s"}</dd></div>
+            <div><dt>Window</dt><dd>{protocol?.config ? `${Number(protocol.config.challengeWindowSeconds) / 3600}h` : "—"}</dd></div>
+            <div><dt>Network</dt><dd>{protocol?.network ? `${protocol.network} · ${protocol.chainId ?? "—"}` : "—"}</dd></div>
+          </dl>
+          <p className="preview-note">A visual draft only. The contract becomes authoritative after final GenLayer execution.</p>
         </div>
       </aside>
     </div>

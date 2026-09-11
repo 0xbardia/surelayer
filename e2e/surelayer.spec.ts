@@ -68,6 +68,18 @@ test("125 percent effective viewport remains usable", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBeTruthy();
 });
 
+test("landing hero keeps intentional spacing below the header", async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const gap = await page.evaluate(() => {
+    const header = document.querySelector(".site-header")?.getBoundingClientRect();
+    const kicker = document.querySelector(".hero-v4 .hero-kicker")?.getBoundingClientRect();
+    return header && kicker ? kicker.top - header.bottom : -1;
+  });
+  expect(gap).toBeGreaterThanOrEqual(40);
+  expect(gap).toBeLessThanOrEqual(100);
+});
+
 test("reduced-motion preference keeps the primary form usable", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/create", { waitUntil: "networkidle" });

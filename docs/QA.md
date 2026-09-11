@@ -43,6 +43,12 @@ Then inspect the public app in Chromium at desktop, mobile, narrow mobile, and
 an effective 125% desktop layout. Check `/`, `/claims`, `/claims/<id>`,
 `/create`, and `/account`.
 
+For the V4 signature surface, also review the assurance instrument hero, dark
+protocol trace, verdict fields, issuance preview, pending transaction states,
+empty states, focus treatment, and `prefers-reduced-motion`. Confirm that the
+conceptual consensus animation is clearly labeled and never implies live
+validator data.
+
 Do not automate or repeat economic writes merely to create screenshots. A
 wallet signature, EVM submission, GenLayer consensus decision, and finalized
 execution result are separate states. A transaction hash alone is not a

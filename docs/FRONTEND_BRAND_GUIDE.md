@@ -1,11 +1,12 @@
-# SureLayer — the assurance ledger
+# SureLayer — assurance instrument
 
 ## Identity
 
-The custom mark combines an angular S and three interlocking proof layers.
-The open geometry suggests independently evaluated parts becoming one economic
-commitment. It avoids a shield or a seal that could imply guaranteed truth.
-The hero is explicitly a protocol concept, with a separate live read beneath it.
+The refined mark is an angular S built from layered paths that register around a
+shared commitment node. The open geometry suggests evidence becoming one
+economic record without implying that the mark guarantees truth. The hero
+repeats this assurance-imprint motif as a conceptual protocol instrument, with
+the live protocol read kept separate and explicit.
 
 Assets: `/brand/surelayer-logo.svg` (primary pairing),
 `/brand/surelayer-mark.svg` (icon), `/icon.svg` (dark app/favicon tile).
@@ -18,12 +19,12 @@ The SVG wordmark uses Arial; the website pairs the mark with its native sans.
 
 | Token | Value | Purpose |
 |---|---|---|
-| Ink | #202923 | Primary text, hero, account balance panel |
-| Paper | #f5f2e9 | Page background |
-| Surface | #fffdf7 | Cards, form surfaces |
-| Brass | #aa7939 | Rules, borders, decorative geometry |
-| Brass dark | #80591f | Accessible accent text on light surfaces |
-| Muted | #61685f | Supporting text |
+| Ink | #14201b | Primary text, hero, account balance panel |
+| Paper | #f0ede3 | Page background |
+| Surface | #fcfaf4 | Cards, form surfaces |
+| Brass | #b4823f | Rules, borders, decorative geometry |
+| Brass dark | #704815 | Accessible accent text on light surfaces |
+| Muted | #687068 | Supporting text |
 | Moss | #286b5b | Supported/finalized |
 | Rust | #a6442a | Breached/errors |
 
@@ -31,38 +32,51 @@ Georgia is the editorial display face. Native system sans handles forms,
 navigation and explanatory text; native monospace handles identifiers. No
 remote font request or additional font dependency. Body remains 16px, with
 13px minimum form help. Long evidence/addresses wrap rather than truncate.
-Controls use 6px radius, major surfaces 12px; the hero has one architectural
-28px corner. Spacing follows 8px increments with small optical adjustments.
+Controls use 6px radius, major surfaces 14px; the hero and ledger panels use
+one architectural corner. Spacing follows 8px increments with small optical
+adjustments. Brass is an accent and structural signal, never a fill for long
+copy.
 
 ## Motion
 
-Control feedback: 180ms. Page/status entry: 420ms, 12px travel. Hero layers:
-600ms with 80ms stagger, once. CSS view-timeline section reveals are progressive
-enhancements with visible fallback. Pending spinner signals ongoing work only.
-No looping marketing animation, scroll hijack, animation library or event
-dependency. Reduced-motion disables transitions, animations and smooth scroll.
+Motion tokens: 120ms micro feedback, 180ms controls, 360ms standard interaction,
+520ms section entry, and 760ms emphasis. The hero uses SVG assurance traces,
+registration rings, and staged instrument labels; the animation is conceptual
+and does not represent live validator telemetry. CSS view-timeline story
+reveals are a progressive enhancement with visible fallback. There is no scroll
+hijack or animation dependency. Reduced-motion removes non-essential movement
+while keeping all protocol information visible.
 
 ## Application language
 
 Navigation shows the active route with a brass underline and aria-current.
-Claims have a commitment rule, readable title, ID, bond and named status.
-Detail is an editorial document beside an economic position sidebar; evidence
-remains linked, text-safe and fully readable. Timeline uses connected points.
-Forms introduce the commitment without changing any wallet or protocol logic.
-Account balances have an ink surface and never use invented values.
+Claims use a ledger/index treatment with a commitment rule, readable title, ID,
+bond and named status. Detail is a digital assurance record beside an economic
+position sidebar; evidence remains linked, text-safe and fully readable.
+Timeline uses connected points. Create introduces a commitment with a live
+draft instrument preview; Challenge presents issuer position versus challenger
+commitment without changing wallet or protocol logic. Account balances use an
+ink ledger surface and never use invented values.
 
-Signing and consensus pending use a neutral brass pending surface. Rejection
+Signing and consensus pending use a neutral brass pending surface with a
+three-node transaction orb. Rejection
 and uncertainty retain explicit warnings. Success requires the existing final
 receipt check; no visual motion advances protocol state. Status always has text
 in addition to color. Transaction hashes wrap and remain visible while pending.
+
+Verdict moments use a restrained record field: SUPPORTED is moss, BREACHED is
+rust, and INCONCLUSIVE is slate. None is presented as a reward animation or an
+alarm; the economic outcome and evidence summary remain the focus.
 
 ## Accessibility and performance
 
 Preserve semantic controls, form labels, visible focus and keyboard access.
 Buttons remain at least 46px high; mobile inputs remain 16px. Native details
 provide FAQ disclosure. Test 1280x900, 393x851, 320x568 and 1024x720.
-No dependency added; vector marks are sub-kilobyte, motion uses transform and
-opacity, and the initial layout reserves space for the hero illustration.
+No dependency added; vector marks are sub-kilobyte, motion uses transform,
+opacity, and SVG stroke offset, and the initial layout reserves space for the
+hero illustration. Keep page entry short and never make motion necessary to
+understand a state.
 
 ## Operations
 

@@ -16,11 +16,15 @@ export function TransactionStatus({ state, message, hash }: TransactionStatusPro
 
 function State({ status, detail, hash, success = false }: { status: string; detail: string; hash?: string; success?: boolean }) {
   const pending = status === "Signing" || status === "Consensus pending";
+  const tone = pending ? "pending" : success ? "success" : status === "Wallet canceled" || status === "Finality unresolved" ? "warning" : "error";
+  const activeStage = status === "Signing" ? 0 : status === "Consensus pending" ? 2 : status === "Finalized" ? 4 : 3;
   return (
-    <div className={`notice ${pending ? "pending" : success ? "success" : status === "Wallet canceled" ? "warning" : status === "Finality unresolved" ? "warning" : "error"}`} role={success || pending ? "status" : "alert"}>
-      <strong>{status}</strong>
-      <p>{detail}</p>
+    <div className={`notice transaction-notice ${tone}`} role={success || pending ? "status" : "alert"}>
+      <span className="transaction-orb" aria-hidden="true"><i /></span>
+      <div className="transaction-copy"><span className="transaction-label">Protocol transaction</span><strong>{status}</strong><p>{detail}</p>
+      <div className="transaction-stage-rail" aria-hidden="true">{["Wallet", "Submitted", "Consensus", "Decision", "Finalized"].map((stage, index) => <span className={index <= activeStage ? "active" : ""} data-label={stage} key={stage} />)}</div>
       {hash ? <p className="mono small mt-24">Transaction: {hash}</p> : null}
+      </div>
     </div>
   );
 }

@@ -93,7 +93,8 @@ export function ChallengeForm({ claimId, bond }: { claimId: string; bond?: bigin
 
   return (
     <div className="form-card">
-      <div className="form-intro"><p className="eyebrow">Counter-evidence</p><h2>Challenge this claim</h2><p>A specific objection, backed by a bond.</p></div>
+      <div className="form-intro"><div className="form-intro-top"><p className="eyebrow">Counter-evidence</p><span className="form-code">CHALLENGE / 02</span></div><h2>Challenge this claim</h2><p>A specific objection, backed by a bond.</p><div className="challenge-commitment"><span className="challenge-sigil" aria-hidden="true">↗</span><div><strong>{bondLabel}</strong><p>at risk until the final verdict</p></div></div></div>
+      <div className="adversarial-brief" aria-label="Issuer and challenger positions"><div><span>Issuer position</span><strong>Claim bond</strong><small>locked against the warranty</small></div><div className="brief-divider" aria-hidden="true">vs</div><div><span>Challenger position</span><strong>{bondLabel}</strong><small>returned by the final outcome</small></div></div>
       {error ? <div ref={errorRef} className="error-summary" tabIndex={-1} role="alert"><strong>Challenge not submitted</strong>{error}</div> : null}
       <TransactionStatus state={txState} hash={txHash} message={txMessage ?? "The challenge is final. The claim now awaits permissionless resolution."} />
       <form className="form-stack mt-24" onSubmit={submit}>

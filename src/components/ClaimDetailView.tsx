@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { ChallengeForm } from "@/components/ChallengeForm";
+import { ProtocolTrace } from "@/components/ProtocolTrace";
 import { StateNotice } from "@/components/StateNotice";
 import { TransactionStatus } from "@/components/TransactionStatus";
 import { requestWalletAccount, submitWrite, transactionErrorState, type BrowserProvider, type TransactionState } from "@/lib/genlayer";
@@ -14,6 +15,13 @@ type ActionMethod = "resolve_claim" | "finalize_unchallenged" | "recover_challen
 
 function safeHttp(value: string) {
   try { const url = new URL(value); return (url.protocol === "http:" || url.protocol === "https:") && !url.username && !url.password; } catch { return false; }
+}
+
+function settlementRecipient(claim: ClaimDetail): string {
+  if (claim.stateName === "SUPPORTED" || claim.stateName === "UNCHALLENGED_FINALIZED") return "Issuer credit";
+  if (claim.stateName === "BREACHED") return "Challenger credit";
+  if (claim.stateName === "INCONCLUSIVE" || claim.stateName === "TIMEOUT_RECOVERED") return "Issuer + challenger credit";
+  return "—";
 }
 
 export function ClaimDetailView({ id }: { id: string }) {
@@ -43,19 +51,21 @@ export function ClaimDetailView({ id }: { id: string }) {
 
 function ClaimContent({ claim, onRefresh }: { claim: ClaimDetail; onRefresh: () => Promise<void> }) {
   return (
-    <div className="container section">
+    <div className="container section detail-shell">
       <div className="detail-grid">
         <article className="detail-main">
-          <Link href="/claims" className="muted small">← Browse claims</Link>
-          <div className="eyebrow mt-24">Warranty #{claim.id}</div>
+          <div className="detail-topline"><Link href="/claims" className="muted small">← Browse claims</Link><span className="record-label">Finalized chain record</span></div>
+          <div className="detail-id-row"><div className="eyebrow mt-24">Warranty #{claim.id}</div><span className="record-mark" aria-hidden="true">SL / {claim.id}</span></div>
           <h1 className="detail-title">{claim.statement}</h1>
-          <span className={`status ${claim.stateName.toLowerCase().replaceAll("_", "-")}`}>{claim.stateName}</span>
+          <div className="detail-status-row"><span className={`status ${claim.stateName.toLowerCase().replaceAll("_", "-")}`}>{claim.stateName}</span><span className="detail-status-note">State recorded by the configured contract</span></div>
           {claim.protocolTest ? <div className="mt-24"><StateNotice title="Protocol test claim">This is a live on-chain protocol test used to exercise the Studionet deployment. It is not user adoption, a customer claim, or an endorsement.</StateNotice></div> : null}
+          <section className={`detail-trace-frame protocol-state-${claim.stateName.toLowerCase().replaceAll("_", "-")}`} aria-labelledby="trace-title"><div className="detail-trace-heading"><p className="eyebrow" id="trace-title">Protocol trace</p><span>Recorded state / {claim.stateName}</span></div><ProtocolTrace compact state={claim.stateName} /><p className="detail-trace-note">A presentation of the claim path from bond to settlement. The contract and finalized GenLayer state remain authoritative.</p></section>
+          {claim.verdict ? <section className={`verdict-panel ${claim.verdict.toLowerCase()}`} aria-labelledby="verdict-title"><div className="verdict-seal" aria-hidden="true"><BrandGlyph /></div><div><p className="eyebrow">Recorded outcome</p><h2 id="verdict-title">{claim.verdict}</h2><p>{claim.resolutionSummary || "The final verdict is recorded in the claim state."}</p><div className="verdict-trace" aria-hidden="true"><span>Evidence</span><i /><span>Consensus</span><i /><span>Ledger</span></div></div></section> : <div className="state-panel"><span className="state-panel-dot" aria-hidden="true" /><div><p className="eyebrow">Awaiting outcome</p><strong>{claim.stateName === "OPEN" ? "The challenge window remains open." : "The claim is awaiting its final protocol outcome."}</strong><p>Only a finalized GenLayer execution can change this record.</p></div></div>}
           <section className="detail-block"><h2>Warranty criteria</h2><p>{claim.criteria}</p></section>
           <section className="detail-block"><h2>Artifact</h2><dl className="data-table"><div className="data-cell"><dt>Reference</dt><dd>{safeHttp(claim.artifactRef) ? <a className="source-link" href={claim.artifactRef} target="_blank" rel="noopener noreferrer">{claim.artifactRef} ↗</a> : claim.artifactRef || "Not supplied"}</dd></div><div className="data-cell"><dt>Content hash</dt><dd className="mono">{claim.artifactHash || "Not supplied"}</dd></div></dl></section>
           <section className="detail-block"><h2>Evidence sources</h2><SourceGroup label="Issuer sources" sources={claim.issuerSources} /><SourceGroup label="Challenger sources" sources={claim.challengerSources} /></section>
           {claim.challengeReason ? <section className="detail-block"><h2>Challenge</h2><p>{claim.challengeReason}</p></section> : null}
-          {claim.verdict ? <section className="detail-block"><h2>Resolution</h2><dl className="data-table"><div className="data-cell"><dt>Verdict</dt><dd><span className={`status ${claim.verdict.toLowerCase()}`}>{claim.verdict}</span></dd></div><div className="data-cell"><dt>Evidence state</dt><dd>{claim.evidenceState || "—"}</dd></div><div className="data-cell"><dt>Criteria met</dt><dd>{claim.criteriaMet ? "Yes" : "No / not established"}</dd></div><div className="data-cell"><dt>Supporting sources</dt><dd>{claim.supportingSourceCount}</dd></div></dl>{claim.resolutionSummary ? <p className="mt-24">{claim.resolutionSummary}</p> : null}</section> : null}
+          {claim.verdict ? <section className="detail-block"><h2>Resolution</h2><dl className="data-table"><div className="data-cell"><dt>Verdict</dt><dd><span className={`status ${claim.verdict.toLowerCase()}`}>{claim.verdict}</span></dd></div><div className="data-cell"><dt>Evidence state</dt><dd>{claim.evidenceState || "—"}</dd></div><div className="data-cell"><dt>Criteria met</dt><dd>{claim.criteriaMet ? "Yes" : "No / not established"}</dd></div><div className="data-cell"><dt>Supporting sources</dt><dd>{claim.supportingSourceCount}</dd></div><div className="data-cell"><dt>Settlement recipient</dt><dd>{settlementRecipient(claim)}</dd></div><div className="data-cell"><dt>Settlement</dt><dd>{claim.settlementDone ? "Recorded in contract" : "Not recorded"}</dd></div><div className="data-cell"><dt>Resolved at</dt><dd>{formatDate(claim.resolvedAt)}</dd></div></dl>{claim.resolutionSummary ? <p className="mt-24">{claim.resolutionSummary}</p> : null}</section> : null}
           <section className="detail-block"><h2>Timeline</h2><ol className="timeline">{claim.timeline.map((event, index) => <li key={`${event.event}-${event.timestamp.toString()}-${index}`}><span className="timeline-dot" aria-hidden="true" /><div><strong>{event.event}</strong><span>{formatDate(event.timestamp)} · {event.actor}</span></div></li>)}</ol></section>
         </article>
         <aside className="side-actions">
@@ -68,6 +78,10 @@ function ClaimContent({ claim, onRefresh }: { claim: ClaimDetail; onRefresh: () 
       </div>
     </div>
   );
+}
+
+function BrandGlyph() {
+  return <svg viewBox="0 0 64 64" fill="none"><path d="M10 16 31 5l23 12v8L43 31l11 6v8L31 57 10 45v-8l11-6-11-7v-8Zm21 1L20 23l11 6 12-6-12-6Zm0 20-11 6 11 6 12-6-12-6Z" fill="currentColor" fillRule="evenodd"/><circle cx="31" cy="35" r="2.25" fill="currentColor"/></svg>;
 }
 
 function SourceGroup({ label, sources }: { label: string; sources: string[] }) {

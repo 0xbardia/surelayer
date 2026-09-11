@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#14201B"/>
+  <g opacity=".22" stroke="#D9B778">
+    <path d="M64 112H1136M64 158H1136M64 472H1136M64 518H1136"/>
+    <path d="M166 48V582M1034 48V582"/>
+  </g>
+  <g opacity=".72" stroke="#D9B778" stroke-width="2" stroke-dasharray="3 12">
+    <path d="M92 178H330C410 178 430 286 516 286H590"/>
+    <path d="M92 452H330C410 452 430 344 516 344H590"/>
+    <path d="M1108 178H870C790 178 770 286 684 286H610"/>
+    <path d="M1108 452H870C790 452 770 344 684 344H610"/>
+  </g>
+  <circle cx="600" cy="315" r="104" stroke="#E2C28A" opacity=".42"/>
+  <circle cx="600" cy="315" r="77" stroke="#E2C28A" stroke-dasharray="2 10" opacity=".75"/>
+  <path d="M600 211v208M496 315h208" stroke="#E2C28A" stroke-dasharray="1 10" opacity=".28"/>
+  <path d="M568 274 600 256l35 19v12l-18 10 18 10v12l-35 19-32-19v-12l17-10-17-10v-13Zm32 1-17 10 17 9 19-9-19-10Zm0 30-17 9 17 10 19-10-19-9Z" fill="#E7C891" fill-rule="evenodd"/>
+  <circle cx="600" cy="315" r="3" fill="#E7C891"/>
+  <text x="72" y="104" fill="#D9B778" font-family="monospace" font-size="16" letter-spacing="4">SURELAYER / ASSURANCE PROTOCOL</text>
+  <text x="72" y="570" fill="#F0EDE3" font-family="Georgia,serif" font-size="74" letter-spacing="-4">Trust, backed by consensus.</text>
+  <text x="74" y="602" fill="#AEB9AF" font-family="monospace" font-size="13" letter-spacing="2">ECONOMIC WEIGHT · EVIDENCE · FINALITY</text>
+</svg>

@@ -22,13 +22,13 @@ export const metadata: Metadata = {
     siteName: "SureLayer",
     title: "SureLayer — Trust, backed by consensus",
     description: "Economic assurance for AI-agent claims, evaluated by GenLayer consensus.",
-    images: [{ url: `${publicOrigin}/icon.svg`, width: 512, height: 512, alt: "SureLayer mark" }],
+    images: [{ url: `${publicOrigin}/brand/surelayer-social.svg`, width: 1200, height: 630, alt: "SureLayer — Trust, backed by consensus" }],
   },
   twitter: {
     card: "summary",
     title: "SureLayer — Trust, backed by consensus",
     description: "Economic assurance for AI-agent claims, evaluated by GenLayer consensus.",
-    images: [`${publicOrigin}/icon.svg`],
+    images: [`${publicOrigin}/brand/surelayer-social.svg`],
   },
   robots: { index: true, follow: true },
 };
@@ -42,7 +42,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <div className="container header-inner">
             <Link href="/" className="brand" aria-label="SureLayer home">
               <BrandMark className="brand-mark" />
-              <span>SureLayer</span>
+              <span className="brand-lockup"><span className="brand-name">SureLayer</span><span className="brand-subline">Assurance protocol</span></span>
             </Link>
             <PrimaryNav />
             <WalletButton />
@@ -52,13 +52,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <footer className="site-footer">
           <div className="container footer-grid">
             <div>
-              <Link href="/" className="brand footer-brand"><BrandMark className="brand-mark" /><span>SureLayer</span></Link>
+              <Link href="/" className="brand footer-brand"><BrandMark className="brand-mark" /><span className="brand-lockup"><span className="brand-name">SureLayer</span><span className="brand-subline">Assurance protocol</span></span></Link>
               <p className="footer-note">A bounded economic assurance layer for claims made by AI agents and their operators.</p>
             </div>
             <div className="footer-links">
               <Link href="/claims">Browse claims</Link>
               <Link href="/create">Create warranty</Link>
               <a href="https://docs.genlayer.com/developers/intelligent-contracts/equivalence-principle" target="_blank" rel="noopener noreferrer">GenLayer consensus ↗</a>
+              <a href="https://github.com/0xbardia/surelayer" target="_blank" rel="noopener noreferrer">Open source ↗</a>
             </div>
             <div className="footer-meta">
               <span>AI &amp; Agents</span>

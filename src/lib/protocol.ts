@@ -39,6 +39,7 @@ export type TimelineEvent = { event: string; timestamp: bigint; actor: string };
 export type ClaimDetail = ClaimSummary & {
   artifactRef: string;
   artifactHash: string;
+  artifactIntegrity: string;
   criteria: string;
   challengeReason: string;
   challengeBond: bigint;
@@ -51,7 +52,9 @@ export type ClaimDetail = ClaimSummary & {
   resolvedAt: bigint;
   settlementDone: boolean;
   issuerSources: string[];
+  issuerHashes: string[];
   challengerSources: string[];
+  challengerHashes: string[];
   timeline: TimelineEvent[];
 };
 
@@ -89,6 +92,10 @@ function text(value: unknown): string {
 
 function bool(value: unknown): boolean {
   return value === true || value === 1 || value === "true";
+}
+
+function strings(value: unknown): string[] {
+  return Array.isArray(value) ? value.map(text) : [];
 }
 
 function state(value: unknown): number {
@@ -134,12 +141,12 @@ export function parseClaimSummary(value: unknown): ClaimSummary {
 export function parseClaimDetail(value: unknown): ClaimDetail {
   const raw = record(value);
   return {
-    ...parseClaimSummary(raw), artifactRef: text(raw.artifactRef), artifactHash: text(raw.artifactHash), criteria: text(raw.criteria),
+    ...parseClaimSummary(raw), artifactRef: text(raw.artifactRef), artifactHash: text(raw.artifactHash), artifactIntegrity: text(raw.artifactIntegrity), criteria: text(raw.criteria),
     challengeReason: text(raw.challengeReason), challengeBond: big(raw.challengeBond), challengedAt: big(raw.challengedAt),
     resolutionDeadline: big(raw.resolutionDeadline), evidenceState: text(raw.evidenceState), criteriaMet: bool(raw.criteriaMet),
     supportingSourceCount: Number(big(raw.supportingSourceCount)), resolutionSummary: text(raw.resolutionSummary), resolvedAt: big(raw.resolvedAt),
-    settlementDone: bool(raw.settlementDone), issuerSources: Array.isArray(raw.issuerSources) ? raw.issuerSources.map(text) : [],
-    challengerSources: Array.isArray(raw.challengerSources) ? raw.challengerSources.map(text) : [],
+    settlementDone: bool(raw.settlementDone), issuerSources: strings(raw.issuerSources), issuerHashes: strings(raw.issuerHashes),
+    challengerSources: strings(raw.challengerSources), challengerHashes: strings(raw.challengerHashes),
     timeline: Array.isArray(raw.timeline) ? raw.timeline.map((entry) => { const item = record(entry); return { event: text(item.event), timestamp: big(item.timestamp), actor: text(item.actor) }; }) : [],
   };
 }
@@ -221,8 +228,10 @@ export async function claimDetail(id: string): Promise<ClaimDetail> {
     readMethod("get_claim_timeline", [claimId]),
   ]);
   const raw = tuple(claimRaw, "claim detail");
+  if (raw.length !== 23) throw new AppError("INTERNAL_ERROR", "The contract returned an incompatible claim detail shape.", 502);
   const stateValue = state(raw[9]);
   const evidence = tuple(evidenceRaw, "claim evidence");
+  if (evidence.length !== 4) throw new AppError("INTERNAL_ERROR", "The contract returned an incompatible evidence shape.", 502);
   const timeline = tuple(timelineRaw, "claim timeline").map((item) => {
     const event = tuple(item, "timeline event");
     return { event: text(event[0]), timestamp: big(event[1]), actor: text(event[2]) };
@@ -233,6 +242,7 @@ export async function claimDetail(id: string): Promise<ClaimDetail> {
     statement: text(raw[2]),
     artifactRef: text(raw[3]),
     artifactHash: text(raw[4]),
+    artifactIntegrity: text(raw[22]),
     criteria: text(raw[5]),
     claimBond: big(raw[6]),
     createdAt: big(raw[7]),
@@ -251,8 +261,10 @@ export async function claimDetail(id: string): Promise<ClaimDetail> {
     resolutionSummary: text(raw[19]),
     resolvedAt: big(raw[20]),
     settlementDone: bool(raw[21]),
-    issuerSources: Array.isArray(evidence[0]) ? evidence[0].map(text) : [],
-    challengerSources: Array.isArray(evidence[1]) ? evidence[1].map(text) : [],
+    issuerSources: strings(evidence[0]),
+    issuerHashes: strings(evidence[1]),
+    challengerSources: strings(evidence[2]),
+    challengerHashes: strings(evidence[3]),
     timeline,
   };
 }

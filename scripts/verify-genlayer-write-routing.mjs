@@ -3,6 +3,7 @@ import { abi, chains, createClient } from "genlayer-js";
 import { decodeFunctionData, fromHex, fromRlp } from "viem";
 
 const root = new URL("..", import.meta.url);
+const FINAL_CONTRACT_ADDRESS = "0x4F8a90c42E04f194415fdd86aE26D379a5fACF51";
 const envText = await readFile(new URL(".env", root), "utf8");
 const env = Object.fromEntries(envText.split(/\r?\n/).flatMap((line) => {
   const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
@@ -16,14 +17,15 @@ const rpcUrl = env.GENLAYER_RPC_URL;
 if (!network || !Object.hasOwn(chains, network)) throw new Error("GENLAYER_NETWORK is not a supported SDK network");
 if (!Number.isSafeInteger(chainId) || chainId !== Number(chains[network].id)) throw new Error("GENLAYER_CHAIN_ID does not match the configured SDK network");
 if (!/^0x[a-fA-F0-9]{40}$/.test(contractAddress ?? "") || /^0x0{40}$/i.test(contractAddress)) throw new Error("GENLAYER_CONTRACT_ADDRESS is not a non-zero address");
+if (contractAddress.toLowerCase() !== FINAL_CONTRACT_ADDRESS.toLowerCase()) throw new Error(`GENLAYER_CONTRACT_ADDRESS must be the final contract ${FINAL_CONTRACT_ADDRESS}`);
 if (!rpcUrl) throw new Error("GENLAYER_RPC_URL is missing");
 
 // This address is used only as a decoded sender in a capture-only provider.
 // No private key is loaded and no transaction is submitted.
 const captureAccount = "0x3333333333333333333333333333333333333333";
 const writes = [
-  { action: "create_claim", args: ["Runtime Contract-B routing proof", "https://example.com/surelayer-contract-b-test", "sha256:contract-b-routing-proof", "The referenced page states that GenLayer transactions use a consensus submission router.", []], value: 1000000000000000000n },
-  { action: "challenge_claim", args: [1, "Contract-B routing challenge proof", []], value: 500000000000000000n },
+  { action: "create_claim", args: ["Runtime Contract routing proof", "", "", "The referenced page states that GenLayer transactions use a consensus submission router.", [], []], value: 1000000000000000000n },
+  { action: "challenge_claim", args: [1, "Contract routing challenge proof", [], []], value: 500000000000000000n },
   { action: "resolve_claim", args: [1], value: 0n },
   { action: "finalize_unchallenged", args: [1], value: 0n },
   { action: "recover_challenge_timeout", args: [1], value: 0n },

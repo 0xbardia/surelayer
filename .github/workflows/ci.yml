@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+      - run: npm ci
+      - run: uv venv .venv --python 3.12
+      - run: uv pip install --python .venv/bin/python genlayer-test==0.30.0rc2
+      - run: .venv/bin/pytest -q tests/test_surelayer_validator.py tests/test_surelayer_contract.py
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          GENLAYER_NETWORK: studionet
+          GENLAYER_CHAIN_ID: "61999"
+          GENLAYER_CONTRACT_ADDRESS: 0x4F8a90c42E04f194415fdd86aE26D379a5fACF51
+          GENLAYER_RPC_URL: https://studio.genlayer.com/api
+          APP_URL: https://surelayer.bydx.fun

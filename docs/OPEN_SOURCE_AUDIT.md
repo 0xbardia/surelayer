@@ -9,7 +9,7 @@ Intelligent Contract and production configuration were not changed.
 - Production URL: `https://surelayer.bydx.fun`
 - Runtime network: GenLayer Studionet
 - Runtime chain ID: `61999`
-- Runtime contract: `0x5B0866dB817C7C99345D1e9EbEF3ae0627e00e93`
+- Historical baseline runtime contract: `0x5B0866dB817C7C99345D1e9EbEF3ae0627e00e93`
 - Contract source SHA-256: `fe46c7b846b961ecc858d6f2669fa989b46549efbae9729e02958978a8081f81`
 - Runtime health: application, RPC, and contract readability all reported OK.
 - Runtime/public configuration: matched the active `.env` contract, network,

@@ -6,6 +6,7 @@ import { chains, createClient } from "genlayer-js";
 import { TransactionHashVariant } from "genlayer-js/types";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const FINAL_CONTRACT_ADDRESS = "0x4F8a90c42E04f194415fdd86aE26D379a5fACF51";
 const env = parseEnv(await readFile(path.join(root, ".env"), "utf8"));
 const failures = [];
 
@@ -48,6 +49,7 @@ const rpcUrl = required("GENLAYER_RPC_URL");
 const appUrl = (process.env.SURELAYER_VERIFY_URL ?? required("APP_URL")).replace(/\/$/, "");
 
 if (!validAddress(contractAddress)) fail("GENLAYER_CONTRACT_ADDRESS is not a non-zero 20-byte hexadecimal address");
+if (!sameAddress(contractAddress, FINAL_CONTRACT_ADDRESS)) fail(`GENLAYER_CONTRACT_ADDRESS must be the final contract ${FINAL_CONTRACT_ADDRESS}`);
 const chainId = Number(chainIdText);
 if (!/^\d+$/.test(chainIdText) || !Number.isSafeInteger(chainId) || chainId <= 0) fail("GENLAYER_CHAIN_ID is not a positive integer");
 if (!Object.hasOwn(chains, network)) fail(`GENLAYER_NETWORK is not a supported SDK network: ${network}`);
@@ -120,8 +122,8 @@ if (validAddress(contractAddress) && Object.hasOwn(chains, network) && chainId =
     list_claims: 2,
   };
   const writes = {
-    create_claim: 5,
-    challenge_claim: 3,
+    create_claim: 6,
+    challenge_claim: 4,
     resolve_claim: 1,
     finalize_unchallenged: 1,
     recover_challenge_timeout: 1,

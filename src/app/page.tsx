@@ -100,7 +100,7 @@ export default function HomePage() {
         <div className="container">
           <div className="section-heading"><p className="eyebrow">05 / Developer path</p><div><h2>Integrate around a final contract state.</h2><p>SureLayer exposes a compact contract interface. The server normalizes reads; the connected wallet signs writes; the contract remains the source of truth.</p></div></div>
           <div className="split developer-grid">
-            <div><h3>Write a warranty</h3><p className="muted">Call the payable create method with a claim, criteria, artifact reference, and bounded source list. The bond is real GEN, not a UI balance.</p><code className="code-block">create_claim(statement, artifact, hash, criteria, sources)</code></div>
+            <div><h3>Write a warranty</h3><p className="muted">Call the payable create method with a claim, criteria, artifact reference, and bounded URL/hash commitments. The bond is real GEN, not a UI balance.</p><code className="code-block">create_claim(statement, artifact, hash, criteria, source_urls, source_hashes)</code></div>
             <div><h3>Read and challenge</h3><p className="muted">Read finalized pages and detail projections, then let a challenger post an exact bond against a concrete criterion.</p><code className="code-block">get_claim(id) → state, evidence, timeline</code></div>
           </div>
         </div>

@@ -117,7 +117,7 @@ challenge text, URLs, and fetched bodies. Evidence is explicitly untrusted
 data; prompt-injection markers and unreliable sources cannot authorize a
 verdict. The validator independently computes the result and compares only
 `verdict`, `evidence_state`, `criteria_met`, and
-`supporting_source_count`. A well-shaped but malicious leader output is not
+`supporting_source_count`, and `artifact_integrity`. A well-shaped but malicious leader output is not
 accepted. Consensus disagreement leaves the claim challenged; the public
 timeout path prevents permanent custody lock.
 
@@ -128,7 +128,8 @@ timeout path prevents permanent custody lock.
 - `get_config()` — deployed constants and input bounds.
 - `get_claim(claim_id)` — bounded detail tuple.
 - `list_claims(offset, limit)` — bounded summary pagination.
-- `get_claim_evidence(claim_id)` — issuer/challenger reference lists.
+- `get_claim_evidence(claim_id)` — issuer URLs, issuer hashes, challenger URLs,
+  and challenger hashes.
 - `get_claim_timeline(claim_id)` — bounded state transition events.
 - `get_credit(address)` and `get_my_credit()` — pull credit balances.
 - `get_protocol_stats()` — count, locked liabilities, credits, contract balance.
@@ -137,9 +138,11 @@ timeout path prevents permanent custody lock.
 ### Payable writes
 
 - `create_claim(statement, artifact_ref, artifact_hash, criteria,
-  issuer_sources)` — requires `value >= min_claim_bond`; returns the ID.
-- `challenge_claim(claim_id, reason, challenger_sources)` — requires the
-  exact challenge bond and an OPEN claim before its deadline; issuer cannot
+  issuer_sources, issuer_hashes)` — requires `value >= min_claim_bond`; each
+  source URL is paired with a canonical SHA-256 commitment; returns the ID.
+- `challenge_claim(claim_id, reason, challenger_sources, challenger_hashes)` —
+  requires the exact challenge bond and an OPEN claim before its deadline; each
+  source URL is paired with a canonical SHA-256 commitment; issuer cannot
   challenge its own claim.
 
 ### Writes

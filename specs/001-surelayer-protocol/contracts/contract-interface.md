@@ -14,8 +14,8 @@ Public views:
 
 Public writes:
 
-- `create_claim(statement, artifact_ref, artifact_hash, criteria, issuer_sources)` payable; requires at least the configured claim bond. The deployed contract uses documented default configuration constants and exposes them through `get_config()`.
-- `challenge_claim(claim_id, reason, challenger_sources)` payable; requires the exact challenge bond and an open claim before its deadline.
+- `create_claim(statement, artifact_ref, artifact_hash, criteria, issuer_sources, issuer_hashes)` payable; requires at least the configured claim bond and paired canonical SHA-256 evidence commitments. The deployed contract uses documented default configuration constants and exposes them through `get_config()`.
+- `challenge_claim(claim_id, reason, challenger_sources, challenger_hashes)` payable; requires the exact challenge bond, an open claim before its deadline, and paired canonical SHA-256 evidence commitments.
 - `resolve_claim(claim_id)`; callable by any address while challenged and before the resolution deadline; consensus determines the verdict.
 - `finalize_unchallenged(claim_id)`; issuer-only after the challenge deadline.
 - `recover_challenge_timeout(claim_id)`; callable by any address after the resolution deadline.

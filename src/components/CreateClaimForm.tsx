@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 import { TransactionStatus } from "@/components/TransactionStatus";
 import { loadRuntimeConfig } from "@/lib/config";
+import { parseArtifact, parseEvidence } from "@/lib/evidence";
 import { pendingWriteForAction, requestWalletAccount, resumePendingWrite, submitWrite, transactionErrorState, type BrowserProvider, type TransactionState } from "@/lib/genlayer";
 import { formatGen, parseProtocolState } from "@/lib/protocol";
 import type { ProtocolReadState } from "@/lib/protocol";
@@ -23,12 +24,6 @@ function parseGen(value: string): bigint {
   if (!/^\d+(\.\d{1,18})?$/.test(value.trim())) throw new Error("Enter a GEN amount with up to 18 decimal places.");
   const [whole, fraction = ""] = value.trim().split(".");
   return BigInt(whole) * 10n ** 18n + BigInt(fraction.padEnd(18, "0") || "0");
-}
-
-function sources(value: string) {
-  const list = value.split("\n").map((item) => item.trim()).filter(Boolean);
-  if (list.some((item) => !/^https?:\/\/[^\s<>"']+$/.test(item))) throw new Error("Every evidence source must be a valid http:// or https:// URL.");
-  return list;
 }
 
 export function CreateClaimForm() {
@@ -97,17 +92,19 @@ export function CreateClaimForm() {
       if (bond < protocol.config.minClaimBond) throw new Error(`The claim bond must be at least ${formatGen(protocol.config.minClaimBond)} GEN.`);
       const statement = String(form.get("statement") ?? "");
       const criteria = String(form.get("criteria") ?? "");
-      const issuerSources = sources(String(form.get("issuerSources") ?? ""));
+      const artifact = parseArtifact(String(form.get("artifactRef") ?? ""), String(form.get("artifactHash") ?? ""));
+      const evidence = parseEvidence(String(form.get("issuerSources") ?? ""), String(form.get("issuerHashes") ?? ""), protocol.config.maxSources);
       if (!window.ethereum) throw new Error("Install a compatible wallet to sign this claim.");
       await requestWalletAccount(window.ethereum as BrowserProvider);
       if (!window.confirm(`Issue this warranty?\n\nClaim bond: ${formatGen(bond)} GEN. The bond is returned for a supported or inconclusive outcome, and is transferred to a successful challenger if the claim is breached.\n\nThe challenge window is ${Number(protocol.config.challengeWindowSeconds) / 3600} hours. Wallet and consensus fees may apply. The result is final only after GenLayer consensus.`)) return;
       setTxState("submitting");
       const receipt = await submitWrite("create_claim", [
         statement,
-        String(form.get("artifactRef") ?? ""),
-        String(form.get("artifactHash") ?? ""),
+        artifact.ref,
+        artifact.hash,
         criteria,
-        issuerSources,
+        evidence.urls,
+        evidence.hashes,
       ], bond, window.ethereum as BrowserProvider, { onSubmitted: (hash) => { setTxHash(hash); setTxState("waiting"); } });
       const cleanup = resetFormAfterSuccess(formElement);
       setTxHash(receipt.hash);
@@ -141,16 +138,21 @@ export function CreateClaimForm() {
           </div>
           <div className="field">
             <label htmlFor="artifactRef">Artifact reference <span className="muted">(optional)</span></label>
-            <input id="artifactRef" name="artifactRef" maxLength={500} placeholder="IPFS, URL, repository, or internal reference" />
+            <input id="artifactRef" name="artifactRef" maxLength={500} placeholder="https://… exact artifact location" />
           </div>
           <div className="field">
             <label htmlFor="artifactHash">Artifact hash <span className="muted">(optional)</span></label>
-            <input id="artifactHash" name="artifactHash" maxLength={128} placeholder="Content hash for the exact output" />
+            <input id="artifactHash" name="artifactHash" maxLength={71} placeholder="sha256:<64 lowercase hex>" />
           </div>
           <div className="field">
             <label htmlFor="issuerSources">Issuer evidence sources <span className="muted">(optional)</span></label>
             <textarea id="issuerSources" name="issuerSources" maxLength={2200} placeholder="One http(s) URL per line; up to 4 sources" />
-            <small>Sources are untrusted evidence. GenLayer fetches bounded excerpts during consensus.</small>
+            <small>Line N is paired with evidence hash line N. GenLayer fetches bounded excerpts during consensus.</small>
+          </div>
+          <div className="field">
+            <label htmlFor="issuerHashes">Issuer evidence SHA-256 commitments <span className="muted">(optional)</span></label>
+            <textarea id="issuerHashes" name="issuerHashes" maxLength={4 * 71 + 3} spellCheck={false} placeholder="sha256:<64 lowercase hex> per line; line N matches source N" />
+            <small>Hashes are explicit browser inputs; no server-side URL fetch is used.</small>
           </div>
           <div className="field">
             <label htmlFor="bond">Claim bond (GEN)</label>

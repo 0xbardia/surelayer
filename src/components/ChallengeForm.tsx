@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 import { TransactionStatus } from "@/components/TransactionStatus";
 import { loadRuntimeConfig } from "@/lib/config";
+import { parseEvidence } from "@/lib/evidence";
 import { pendingWriteForAction, requestWalletAccount, resumePendingWrite, submitWrite, transactionErrorState, type BrowserProvider, type TransactionState } from "@/lib/genlayer";
 import { formatGen, parseProtocolState } from "@/lib/protocol";
 import type { ProtocolReadState } from "@/lib/protocol";
@@ -17,12 +18,6 @@ function resetFormAfterSuccess(form: HTMLFormElement): PostSuccessCleanup {
   } catch {
     return "POST_SUCCESS_UI_ERROR";
   }
-}
-
-function sources(value: string) {
-  const list = value.split("\n").map((item) => item.trim()).filter(Boolean);
-  if (list.some((item) => !/^https?:\/\/[^\s<>"']+$/.test(item))) throw new Error("Every evidence source must be a valid http:// or https:// URL.");
-  return list;
 }
 
 export function ChallengeForm({ claimId, bond }: { claimId: string; bond?: bigint }) {
@@ -73,12 +68,12 @@ export function ChallengeForm({ claimId, bond }: { claimId: string; bond?: bigin
       const expected = bond ?? (protocol?.config ? BigInt(protocol.config.challengeBond) : null);
       if (expected === null) throw new Error("The final challenge bond is unavailable.");
       const reason = String(form.get("reason") ?? "");
-      const challengerSources = sources(String(form.get("sources") ?? ""));
+      const evidence = parseEvidence(String(form.get("sources") ?? ""), String(form.get("hashes") ?? ""), protocol?.config?.maxSources);
       if (!window.ethereum) throw new Error("Install a compatible wallet to sign this challenge.");
       await requestWalletAccount(window.ethereum as BrowserProvider);
       if (!window.confirm(`Post this challenge?\n\nChallenge bond: ${formatGen(expected)} GEN. It is returned only for a breached or inconclusive outcome; a supported claim transfers it to the issuer.\n\nThe challenge becomes final only after GenLayer consensus. Wallet and consensus fees may apply.`)) return;
       setTxState("submitting");
-      const receipt = await submitWrite("challenge_claim", [Number(claimId), reason, challengerSources], expected, window.ethereum as BrowserProvider, { onSubmitted: (hash) => { setTxHash(hash); setTxState("waiting"); } });
+      const receipt = await submitWrite("challenge_claim", [Number(claimId), reason, evidence.urls, evidence.hashes], expected, window.ethereum as BrowserProvider, { onSubmitted: (hash) => { setTxHash(hash); setTxState("waiting"); } });
       const cleanup = resetFormAfterSuccess(formElement);
       setTxHash(receipt.hash);
       setTxMessage(cleanup === "POST_SUCCESS_UI_ERROR"
@@ -99,7 +94,8 @@ export function ChallengeForm({ claimId, bond }: { claimId: string; bond?: bigin
       <TransactionStatus state={txState} hash={txHash} message={txMessage ?? "The challenge is final. The claim now awaits permissionless resolution."} />
       <form className="form-stack mt-24" onSubmit={submit}>
         <div className="field"><label htmlFor="reason">Challenge reason</label><textarea id="reason" name="reason" required maxLength={1200} placeholder="Identify the specific warranty criterion that is not met." /><small>Keep the challenge bounded and testable.</small></div>
-        <div className="field"><label htmlFor="sources">Challenger evidence sources <span className="muted">(optional)</span></label><textarea id="sources" name="sources" maxLength={2200} placeholder="One http(s) URL per line; up to 4 sources" /></div>
+        <div className="field"><label htmlFor="sources">Challenger evidence sources <span className="muted">(optional)</span></label><textarea id="sources" name="sources" maxLength={2200} placeholder="One http(s) URL per line; up to 4 sources" /><small>Line N is paired with evidence hash line N.</small></div>
+        <div className="field"><label htmlFor="hashes">Challenger evidence SHA-256 commitments <span className="muted">(optional)</span></label><textarea id="hashes" name="hashes" maxLength={4 * 71 + 3} spellCheck={false} placeholder="sha256:<64 lowercase hex> per line; line N matches source N" /><small>Hashes are explicit browser inputs; no server-side URL fetch is used.</small></div>
         <label className="checkline"><input type="checkbox" required /> <span>I understand that {bondLabel} will be locked and returned only according to the final verdict.</span></label>
         <button className="button" type="submit" disabled={txState === "submitting" || txState === "waiting" || txState === "undetermined"}>{txState === "submitting" ? "Confirm in wallet…" : txState === "waiting" ? "Waiting for finality…" : txState === "undetermined" ? "Read transaction before retrying" : "Post challenge bond"}</button>
       </form>

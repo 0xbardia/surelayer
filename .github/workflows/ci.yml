@@ -29,6 +29,6 @@ jobs:
         env:
           GENLAYER_NETWORK: studionet
           GENLAYER_CHAIN_ID: "61999"
-          GENLAYER_CONTRACT_ADDRESS: 0x4F8a90c42E04f194415fdd86aE26D379a5fACF51
+          GENLAYER_CONTRACT_ADDRESS: "0x4F8a90c42E04f194415fdd86aE26D379a5fACF51"
           GENLAYER_RPC_URL: https://studio.genlayer.com/api
           APP_URL: https://surelayer.bydx.fun
